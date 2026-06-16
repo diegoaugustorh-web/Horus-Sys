@@ -1,0 +1,1 @@
+- [Hórus CRM stack](horus-crm-stack.md) — key decisions: Clerk cookie auth, Drizzle numeric cast, first-user-admin pattern, typecheck:libs required after schema changes.

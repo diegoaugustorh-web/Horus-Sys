@@ -1,22 +1,41 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Hórus CRM API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: clientes
+    description: Clientes operations
+  - name: apolices
+    description: Apólices operations
+  - name: oportunidades
+    description: Oportunidades pipeline operations
+  - name: sinistros
+    description: Sinistros operations
+  - name: comissoes
+    description: Comissões operations
+  - name: consorcios
+    description: Consórcios operations
+  - name: produtos
+    description: Produtos catalog operations
+  - name: reunioes
+    description: Reuniões operations
+  - name: dashboard
+    description: Dashboard summary operations
+  - name: usuarios
+    description: Users and roles management
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +43,732 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ======= DASHBOARD =======
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Dashboard KPIs and summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/proximos-vencimentos:
+    get:
+      operationId: getProximosVencimentos
+      tags: [dashboard]
+      summary: Next expiring policies
+      responses:
+        "200":
+          description: List of expiring policies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Apolice"
+
+  /dashboard/sinistros-recentes:
+    get:
+      operationId: getSinistrosRecentes
+      tags: [dashboard]
+      summary: Recent claims
+      responses:
+        "200":
+          description: List of recent claims
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sinistro"
+
+  # ======= CLIENTES =======
+  /clientes:
+    get:
+      operationId: listClientes
+      tags: [clientes]
+      summary: List clients
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: tipo
+          in: query
+          schema:
+            type: string
+            enum: [PF, PJ]
+      responses:
+        "200":
+          description: List of clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Cliente"
+    post:
+      operationId: createCliente
+      tags: [clientes]
+      summary: Create a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClienteInput"
+      responses:
+        "201":
+          description: Created client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cliente"
+
+  /clientes/{id}:
+    get:
+      operationId: getCliente
+      tags: [clientes]
+      summary: Get a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cliente"
+    patch:
+      operationId: updateCliente
+      tags: [clientes]
+      summary: Update a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClienteUpdate"
+      responses:
+        "200":
+          description: Updated client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cliente"
+    delete:
+      operationId: deleteCliente
+      tags: [clientes]
+      summary: Delete a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # ======= PRODUTOS =======
+  /produtos:
+    get:
+      operationId: listProdutos
+      tags: [produtos]
+      summary: List products
+      parameters:
+        - name: categoria
+          in: query
+          schema:
+            type: string
+            enum: [seguro, consorcio]
+        - name: tipoPessoa
+          in: query
+          schema:
+            type: string
+            enum: [PF, PJ, AMBOS]
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Produto"
+    post:
+      operationId: createProduto
+      tags: [produtos]
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProdutoInput"
+      responses:
+        "201":
+          description: Created product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Produto"
+
+  /produtos/{id}:
+    patch:
+      operationId: updateProduto
+      tags: [produtos]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProdutoUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Produto"
+    delete:
+      operationId: deleteProduto
+      tags: [produtos]
+      summary: Delete a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # ======= APÓLICES =======
+  /apolices:
+    get:
+      operationId: listApolices
+      tags: [apolices]
+      summary: List policies
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: ramo
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: clienteId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of policies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Apolice"
+    post:
+      operationId: createApolice
+      tags: [apolices]
+      summary: Create a policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApoliceInput"
+      responses:
+        "201":
+          description: Created policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Apolice"
+
+  /apolices/{id}:
+    patch:
+      operationId: updateApolice
+      tags: [apolices]
+      summary: Update a policy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApoliceUpdate"
+      responses:
+        "200":
+          description: Updated policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Apolice"
+    delete:
+      operationId: deleteApolice
+      tags: [apolices]
+      summary: Delete a policy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # ======= OPORTUNIDADES (PIPELINE) =======
+  /oportunidades:
+    get:
+      operationId: listOportunidades
+      tags: [oportunidades]
+      summary: List pipeline opportunities
+      responses:
+        "200":
+          description: List of opportunities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Oportunidade"
+    post:
+      operationId: createOportunidade
+      tags: [oportunidades]
+      summary: Create an opportunity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OportunidadeInput"
+      responses:
+        "201":
+          description: Created opportunity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Oportunidade"
+
+  /oportunidades/{id}:
+    patch:
+      operationId: updateOportunidade
+      tags: [oportunidades]
+      summary: Update an opportunity (move stage, etc.)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OportunidadeUpdate"
+      responses:
+        "200":
+          description: Updated opportunity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Oportunidade"
+    delete:
+      operationId: deleteOportunidade
+      tags: [oportunidades]
+      summary: Delete an opportunity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # ======= SINISTROS =======
+  /sinistros:
+    get:
+      operationId: listSinistros
+      tags: [sinistros]
+      summary: List claims
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of claims
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sinistro"
+    post:
+      operationId: createSinistro
+      tags: [sinistros]
+      summary: Create a claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SinistroInput"
+      responses:
+        "201":
+          description: Created claim
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sinistro"
+
+  /sinistros/{id}:
+    patch:
+      operationId: updateSinistro
+      tags: [sinistros]
+      summary: Update a claim
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SinistroUpdate"
+      responses:
+        "200":
+          description: Updated claim
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sinistro"
+    delete:
+      operationId: deleteSinistro
+      tags: [sinistros]
+      summary: Delete a claim
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # ======= COMISSÕES =======
+  /comissoes:
+    get:
+      operationId: listComissoes
+      tags: [comissoes]
+      summary: List commissions
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of commissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comissao"
+    post:
+      operationId: createComissao
+      tags: [comissoes]
+      summary: Create a commission entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComissaoInput"
+      responses:
+        "201":
+          description: Created commission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comissao"
+
+  /comissoes/{id}:
+    patch:
+      operationId: updateComissao
+      tags: [comissoes]
+      summary: Update commission status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComissaoUpdate"
+      responses:
+        "200":
+          description: Updated commission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comissao"
+
+  # ======= CONSÓRCIOS =======
+  /consorcios:
+    get:
+      operationId: listConsorcios
+      tags: [consorcios]
+      summary: List consortiums
+      responses:
+        "200":
+          description: List of consortiums
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Consorcio"
+    post:
+      operationId: createConsorcio
+      tags: [consorcios]
+      summary: Create a consortium
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsorcioInput"
+      responses:
+        "201":
+          description: Created consortium
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Consorcio"
+
+  /consorcios/{id}:
+    patch:
+      operationId: updateConsorcio
+      tags: [consorcios]
+      summary: Update a consortium
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsorcioUpdate"
+      responses:
+        "200":
+          description: Updated consortium
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Consorcio"
+    delete:
+      operationId: deleteConsorcio
+      tags: [consorcios]
+      summary: Delete a consortium
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # ======= REUNIÕES =======
+  /reunioes:
+    get:
+      operationId: listReunioes
+      tags: [reunioes]
+      summary: List meetings
+      responses:
+        "200":
+          description: List of meetings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reuniao"
+    post:
+      operationId: createReuniao
+      tags: [reunioes]
+      summary: Create a meeting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReuniaoInput"
+      responses:
+        "201":
+          description: Created meeting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reuniao"
+
+  /reunioes/{id}:
+    delete:
+      operationId: deleteReuniao
+      tags: [reunioes]
+      summary: Delete a meeting
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # ======= USUÁRIOS =======
+  /usuarios:
+    get:
+      operationId: listUsuarios
+      tags: [usuarios]
+      summary: List users (admin only)
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Usuario"
+    post:
+      operationId: createUsuario
+      tags: [usuarios]
+      summary: Create a user (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioInput"
+      responses:
+        "201":
+          description: Created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Usuario"
+
+  /usuarios/{id}:
+    patch:
+      operationId: updateUsuario
+      tags: [usuarios]
+      summary: Update user role
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Usuario"
+    delete:
+      operationId: deleteUsuario
+      tags: [usuarios]
+      summary: Delete a user (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /usuarios/me:
+    get:
+      operationId: getMe
+      tags: [usuarios]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Usuario"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +779,771 @@ components:
       required:
         - status
 
+    # ===== DASHBOARD =====
+    DashboardSummary:
+      type: object
+      required:
+        - premioTotal
+        - apolicesVigentes
+        - aRenovar
+        - sinistrosAbertos
+        - comissoesAReceber
+        - pipelineValor
+        - totalClientes
+        - totalApolices
+        - totalOportunidades
+      properties:
+        premioTotal:
+          type: number
+        apolicesVigentes:
+          type: integer
+        aRenovar:
+          type: integer
+        sinistrosAbertos:
+          type: integer
+        comissoesAReceber:
+          type: number
+        pipelineValor:
+          type: number
+        ganhoMes:
+          type: number
+        totalClientes:
+          type: integer
+        totalApolices:
+          type: integer
+        totalOportunidades:
+          type: integer
+
+    # ===== CLIENTE =====
+    Cliente:
+      type: object
+      required: [id, nome, tipo, criadoEm]
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        cpfCnpj:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        telefone:
+          type: ["string", "null"]
+        tipo:
+          type: string
+          enum: [PF, PJ]
+        cidade:
+          type: ["string", "null"]
+        observacao:
+          type: ["string", "null"]
+        criadoEm:
+          type: string
+        dataNascimento:
+          type: ["string", "null"]
+        estadoCivil:
+          type: ["string", "null"]
+        contatoRecado:
+          type: ["string", "null"]
+        cep:
+          type: ["string", "null"]
+        endereco:
+          type: ["string", "null"]
+        numero:
+          type: ["string", "null"]
+        complemento:
+          type: ["string", "null"]
+        razaoSocial:
+          type: ["string", "null"]
+        nomeFantasia:
+          type: ["string", "null"]
+        inscricaoEstadual:
+          type: ["string", "null"]
+        inscricaoMunicipal:
+          type: ["string", "null"]
+        telefoneComercial:
+          type: ["string", "null"]
+        repNome:
+          type: ["string", "null"]
+        repCpf:
+          type: ["string", "null"]
+        repDataNascimento:
+          type: ["string", "null"]
+        repTelefone:
+          type: ["string", "null"]
+        produtoId:
+          type: ["string", "null"]
+        produtoCategoria:
+          type: ["string", "null"]
+        produtoValorContratado:
+          type: ["number", "null"]
+        produtoQtdParcelas:
+          type: ["integer", "null"]
+        produtoValorParcela:
+          type: ["number", "null"]
+        produtoValorTotalParcelas:
+          type: ["number", "null"]
+        produtoValorComissao:
+          type: ["number", "null"]
+        produtoDataAssembleia:
+          type: ["string", "null"]
+        produtoResultadoAssembleia:
+          type: ["string", "null"]
+
+    ClienteInput:
+      type: object
+      required: [nome, tipo]
+      properties:
+        nome:
+          type: string
+        cpfCnpj:
+          type: string
+        email:
+          type: string
+        telefone:
+          type: string
+        tipo:
+          type: string
+          enum: [PF, PJ]
+        cidade:
+          type: string
+        observacao:
+          type: string
+        dataNascimento:
+          type: string
+        estadoCivil:
+          type: string
+        contatoRecado:
+          type: string
+        cep:
+          type: string
+        endereco:
+          type: string
+        numero:
+          type: string
+        complemento:
+          type: string
+        razaoSocial:
+          type: string
+        nomeFantasia:
+          type: string
+        inscricaoEstadual:
+          type: string
+        inscricaoMunicipal:
+          type: string
+        telefoneComercial:
+          type: string
+        repNome:
+          type: string
+        repCpf:
+          type: string
+        repDataNascimento:
+          type: string
+        repTelefone:
+          type: string
+        produtoId:
+          type: string
+        produtoCategoria:
+          type: string
+        produtoValorContratado:
+          type: number
+        produtoQtdParcelas:
+          type: integer
+        produtoValorParcela:
+          type: number
+        produtoValorTotalParcelas:
+          type: number
+        produtoValorComissao:
+          type: number
+        produtoDataAssembleia:
+          type: string
+        produtoResultadoAssembleia:
+          type: string
+
+    ClienteUpdate:
+      type: object
+      properties:
+        nome:
+          type: string
+        cpfCnpj:
+          type: string
+        email:
+          type: string
+        telefone:
+          type: string
+        tipo:
+          type: string
+          enum: [PF, PJ]
+        cidade:
+          type: string
+        observacao:
+          type: string
+        dataNascimento:
+          type: string
+        estadoCivil:
+          type: string
+        contatoRecado:
+          type: string
+        cep:
+          type: string
+        endereco:
+          type: string
+        numero:
+          type: string
+        complemento:
+          type: string
+        razaoSocial:
+          type: string
+        nomeFantasia:
+          type: string
+        inscricaoEstadual:
+          type: string
+        inscricaoMunicipal:
+          type: string
+        telefoneComercial:
+          type: string
+        repNome:
+          type: string
+        repCpf:
+          type: string
+        repDataNascimento:
+          type: string
+        repTelefone:
+          type: string
+        produtoId:
+          type: string
+        produtoCategoria:
+          type: string
+        produtoValorContratado:
+          type: number
+        produtoQtdParcelas:
+          type: integer
+        produtoValorParcela:
+          type: number
+        produtoValorTotalParcelas:
+          type: number
+        produtoValorComissao:
+          type: number
+        produtoDataAssembleia:
+          type: string
+        produtoResultadoAssembleia:
+          type: string
+
+    # ===== PRODUTO =====
+    Produto:
+      type: object
+      required: [id, nome, categoria, tipoPessoa, ativo]
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        categoria:
+          type: string
+          enum: [seguro, consorcio]
+        tipoPessoa:
+          type: string
+          enum: [PF, PJ, AMBOS]
+        ativo:
+          type: boolean
+
+    ProdutoInput:
+      type: object
+      required: [nome, categoria, tipoPessoa]
+      properties:
+        nome:
+          type: string
+        categoria:
+          type: string
+          enum: [seguro, consorcio]
+        tipoPessoa:
+          type: string
+          enum: [PF, PJ, AMBOS]
+        ativo:
+          type: boolean
+
+    ProdutoUpdate:
+      type: object
+      properties:
+        nome:
+          type: string
+        categoria:
+          type: string
+          enum: [seguro, consorcio]
+        tipoPessoa:
+          type: string
+          enum: [PF, PJ, AMBOS]
+        ativo:
+          type: boolean
+
+    # ===== APOLICE =====
+    Apolice:
+      type: object
+      required: [id, numero, ramo, premio, status, comissaoPct, criadoEm]
+      properties:
+        id:
+          type: string
+        numero:
+          type: string
+        clienteId:
+          type: ["string", "null"]
+        clienteNome:
+          type: ["string", "null"]
+        seguradora:
+          type: ["string", "null"]
+        ramo:
+          type: string
+          enum: [Auto, Vida, Residencial, Empresarial, Saúde, Viagem]
+        premio:
+          type: number
+        inicio:
+          type: ["string", "null"]
+        fim:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [Vigente, "A Renovar", Vencida, Cancelada]
+        comissaoPct:
+          type: number
+        observacao:
+          type: ["string", "null"]
+        criadoEm:
+          type: string
+
+    ApoliceInput:
+      type: object
+      required: [numero, ramo, status]
+      properties:
+        numero:
+          type: string
+        clienteId:
+          type: string
+        seguradora:
+          type: string
+        ramo:
+          type: string
+          enum: [Auto, Vida, Residencial, Empresarial, Saúde, Viagem]
+        premio:
+          type: number
+        inicio:
+          type: string
+        fim:
+          type: string
+        status:
+          type: string
+          enum: [Vigente, "A Renovar", Vencida, Cancelada]
+        comissaoPct:
+          type: number
+        observacao:
+          type: string
+
+    ApoliceUpdate:
+      type: object
+      properties:
+        numero:
+          type: string
+        clienteId:
+          type: string
+        seguradora:
+          type: string
+        ramo:
+          type: string
+          enum: [Auto, Vida, Residencial, Empresarial, Saúde, Viagem]
+        premio:
+          type: number
+        inicio:
+          type: string
+        fim:
+          type: string
+        status:
+          type: string
+          enum: [Vigente, "A Renovar", Vencida, Cancelada]
+        comissaoPct:
+          type: number
+        observacao:
+          type: string
+
+    # ===== OPORTUNIDADE =====
+    Oportunidade:
+      type: object
+      required: [id, cliente, ramo, valorEstimado, estagio, criadoEm]
+      properties:
+        id:
+          type: string
+        cliente:
+          type: string
+        clienteId:
+          type: ["string", "null"]
+        ramo:
+          type: string
+          enum: [Auto, Vida, Residencial, Empresarial, Saúde, Viagem]
+        valorEstimado:
+          type: number
+        estagio:
+          type: string
+          enum: [Lead, Cotação, Proposta, Negociação, Ganho, Perdido]
+        responsavel:
+          type: ["string", "null"]
+        observacao:
+          type: ["string", "null"]
+        criadoEm:
+          type: string
+
+    OportunidadeInput:
+      type: object
+      required: [cliente, ramo, valorEstimado, estagio]
+      properties:
+        cliente:
+          type: string
+        clienteId:
+          type: string
+        ramo:
+          type: string
+          enum: [Auto, Vida, Residencial, Empresarial, Saúde, Viagem]
+        valorEstimado:
+          type: number
+        estagio:
+          type: string
+          enum: [Lead, Cotação, Proposta, Negociação, Ganho, Perdido]
+        responsavel:
+          type: string
+        observacao:
+          type: string
+
+    OportunidadeUpdate:
+      type: object
+      properties:
+        cliente:
+          type: string
+        ramo:
+          type: string
+          enum: [Auto, Vida, Residencial, Empresarial, Saúde, Viagem]
+        valorEstimado:
+          type: number
+        estagio:
+          type: string
+          enum: [Lead, Cotação, Proposta, Negociação, Ganho, Perdido]
+        responsavel:
+          type: string
+        observacao:
+          type: string
+
+    # ===== SINISTRO =====
+    Sinistro:
+      type: object
+      required: [id, protocolo, valorEstimado, status, abertoEm, criadoEm]
+      properties:
+        id:
+          type: string
+        protocolo:
+          type: string
+        apoliceId:
+          type: ["string", "null"]
+        apoliceNumero:
+          type: ["string", "null"]
+        clienteNome:
+          type: ["string", "null"]
+        apoliceRamo:
+          type: ["string", "null"]
+        dataOcorrencia:
+          type: ["string", "null"]
+        descricao:
+          type: ["string", "null"]
+        valorEstimado:
+          type: number
+        status:
+          type: string
+          enum: [Aberto, "Em Análise", Aprovado, Negado, Pago]
+        abertoEm:
+          type: string
+        criadoEm:
+          type: string
+
+    SinistroInput:
+      type: object
+      required: [protocolo, status]
+      properties:
+        protocolo:
+          type: string
+        apoliceId:
+          type: string
+        dataOcorrencia:
+          type: string
+        descricao:
+          type: string
+        valorEstimado:
+          type: number
+        status:
+          type: string
+          enum: [Aberto, "Em Análise", Aprovado, Negado, Pago]
+
+    SinistroUpdate:
+      type: object
+      properties:
+        protocolo:
+          type: string
+        apoliceId:
+          type: string
+        dataOcorrencia:
+          type: string
+        descricao:
+          type: string
+        valorEstimado:
+          type: number
+        status:
+          type: string
+          enum: [Aberto, "Em Análise", Aprovado, Negado, Pago]
+
+    # ===== COMISSAO =====
+    Comissao:
+      type: object
+      required: [id, parcela, totalParcelas, valor, status, criadoEm]
+      properties:
+        id:
+          type: string
+        apoliceId:
+          type: ["string", "null"]
+        apoliceNumero:
+          type: ["string", "null"]
+        clienteNome:
+          type: ["string", "null"]
+        seguradora:
+          type: ["string", "null"]
+        parcela:
+          type: integer
+        totalParcelas:
+          type: integer
+        valor:
+          type: number
+        vencimento:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: ["A Receber", Recebida, Atrasada]
+        criadoEm:
+          type: string
+
+    ComissaoInput:
+      type: object
+      required: [parcela, totalParcelas, valor, status]
+      properties:
+        apoliceId:
+          type: string
+        parcela:
+          type: integer
+        totalParcelas:
+          type: integer
+        valor:
+          type: number
+        vencimento:
+          type: string
+        status:
+          type: string
+          enum: ["A Receber", Recebida, Atrasada]
+
+    ComissaoUpdate:
+      type: object
+      properties:
+        parcela:
+          type: integer
+        totalParcelas:
+          type: integer
+        valor:
+          type: number
+        vencimento:
+          type: string
+        status:
+          type: string
+          enum: ["A Receber", Recebida, Atrasada]
+
+    # ===== CONSORCIO =====
+    Consorcio:
+      type: object
+      required: [id, valorCredito, prazoMeses, taxaAdmPct, parcela, status, criadoEm]
+      properties:
+        id:
+          type: string
+        clienteId:
+          type: ["string", "null"]
+        clienteNome:
+          type: ["string", "null"]
+        administradora:
+          type: ["string", "null"]
+        bem:
+          type: ["string", "null"]
+        grupo:
+          type: ["string", "null"]
+        cota:
+          type: ["string", "null"]
+        valorCredito:
+          type: number
+        prazoMeses:
+          type: integer
+        taxaAdmPct:
+          type: number
+        parcela:
+          type: number
+        inicio:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [Ativo, Contemplado, Quitado, Cancelado, Atrasado]
+        observacao:
+          type: ["string", "null"]
+        criadoEm:
+          type: string
+
+    ConsorcioInput:
+      type: object
+      required: [valorCredito, prazoMeses, taxaAdmPct, parcela, status]
+      properties:
+        clienteId:
+          type: string
+        administradora:
+          type: string
+        bem:
+          type: string
+        grupo:
+          type: string
+        cota:
+          type: string
+        valorCredito:
+          type: number
+        prazoMeses:
+          type: integer
+        taxaAdmPct:
+          type: number
+        parcela:
+          type: number
+        inicio:
+          type: string
+        status:
+          type: string
+          enum: [Ativo, Contemplado, Quitado, Cancelado, Atrasado]
+        observacao:
+          type: string
+
+    ConsorcioUpdate:
+      type: object
+      properties:
+        clienteId:
+          type: string
+        administradora:
+          type: string
+        bem:
+          type: string
+        grupo:
+          type: string
+        cota:
+          type: string
+        valorCredito:
+          type: number
+        prazoMeses:
+          type: integer
+        taxaAdmPct:
+          type: number
+        parcela:
+          type: number
+        inicio:
+          type: string
+        status:
+          type: string
+          enum: [Ativo, Contemplado, Quitado, Cancelado, Atrasado]
+        observacao:
+          type: string
+
+    # ===== REUNIAO =====
+    Reuniao:
+      type: object
+      required: [id, titulo, dataHora, tipo, modalidade, criadoEm]
+      properties:
+        id:
+          type: string
+        clienteId:
+          type: ["string", "null"]
+        clienteNome:
+          type: ["string", "null"]
+        clienteTelefone:
+          type: ["string", "null"]
+        clienteEmail:
+          type: ["string", "null"]
+        titulo:
+          type: string
+        dataHora:
+          type: string
+        tipo:
+          type: string
+        modalidade:
+          type: string
+        linkReuniao:
+          type: ["string", "null"]
+        enviarConvite:
+          type: boolean
+        notificarCelular:
+          type: boolean
+        observacoes:
+          type: ["string", "null"]
+        criadoEm:
+          type: string
+
+    ReuniaoInput:
+      type: object
+      required: [titulo, dataHora, tipo, modalidade]
+      properties:
+        clienteId:
+          type: string
+        titulo:
+          type: string
+        dataHora:
+          type: string
+        tipo:
+          type: string
+        modalidade:
+          type: string
+        linkReuniao:
+          type: string
+        enviarConvite:
+          type: boolean
+        notificarCelular:
+          type: boolean
+        observacoes:
+          type: string
+
+    # ===== USUARIO =====
+    Usuario:
+      type: object
+      required: [id, email, role, criadoEm]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        nome:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [admin, corretor, atendente]
+        criadoEm:
+          type: string
+
+    UsuarioInput:
+      type: object
+      required: [email, role]
+      properties:
+        email:
+          type: string
+        nome:
+          type: string
+        role:
+          type: string
+          enum: [admin, corretor, atendente]
+        password:
+          type: string
+
+    UsuarioUpdate:
+      type: object
+      properties:
+        nome:
+          type: string
+        role:
+          type: string
+          enum: [admin, corretor, atendente]
