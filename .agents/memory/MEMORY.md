@@ -1,1 +1,1 @@
-- [Hórus CRM stack](horus-crm-stack.md) — key decisions: Clerk cookie auth, Drizzle numeric cast, first-user-admin pattern, typecheck:libs required after schema changes.
+- [Dashboard metric definitions](dashboard-metric-definitions.md) — agreed date rules for Hórus CRM's policy and commission dashboard metrics.

@@ -6,6 +6,8 @@ info:
 servers:
   - url: /api
     description: Base API path
+security:
+  - ClerkSession: []
 tags:
   - name: health
     description: Health operations
@@ -36,6 +38,7 @@ paths:
       operationId: healthCheck
       tags: [health]
       summary: Health check
+      security: []
       responses:
         "200":
           description: Healthy
@@ -770,6 +773,11 @@ paths:
                 $ref: "#/components/schemas/Usuario"
 
 components:
+  securitySchemes:
+    ClerkSession:
+      type: apiKey
+      in: cookie
+      name: __session
   schemas:
     HealthStatus:
       type: object
@@ -784,6 +792,8 @@ components:
       type: object
       required:
         - premioTotal
+        - premioVendidoMes
+        - comissaoGeradaMes
         - apolicesVigentes
         - aRenovar
         - sinistrosAbertos
@@ -795,6 +805,10 @@ components:
       properties:
         premioTotal:
           type: number
+        premioVendidoMes:
+          type: number
+        comissaoGeradaMes:
+          type: number
         apolicesVigentes:
           type: integer
         aRenovar:
@@ -804,8 +818,6 @@ components:
         comissoesAReceber:
           type: number
         pipelineValor:
-          type: number
-        ganhoMes:
           type: number
         totalClientes:
           type: integer

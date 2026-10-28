@@ -21,12 +21,13 @@ export const HealthCheckResponse = zod.object({
  */
 export const GetDashboardSummaryResponse = zod.object({
   "premioTotal": zod.number(),
+  "premioVendidoMes": zod.number(),
+  "comissaoGeradaMes": zod.number(),
   "apolicesVigentes": zod.number(),
   "aRenovar": zod.number(),
   "sinistrosAbertos": zod.number(),
   "comissoesAReceber": zod.number(),
   "pipelineValor": zod.number(),
-  "ganhoMes": zod.number().optional(),
   "totalClientes": zod.number(),
   "totalApolices": zod.number(),
   "totalOportunidades": zod.number()

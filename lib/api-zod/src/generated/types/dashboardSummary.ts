@@ -8,12 +8,13 @@
 
 export interface DashboardSummary {
   premioTotal: number;
+  premioVendidoMes: number;
+  comissaoGeradaMes: number;
   apolicesVigentes: number;
   aRenovar: number;
   sinistrosAbertos: number;
   comissoesAReceber: number;
   pipelineValor: number;
-  ganhoMes?: number;
   totalClientes: number;
   totalApolices: number;
   totalOportunidades: number;

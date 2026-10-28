@@ -10,10 +10,12 @@ import consorciosRouter from "./consorcios";
 import reunioesRouter from "./reunioes";
 import usuariosRouter from "./usuarios";
 import dashboardRouter from "./dashboard";
+import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(requireAuth);
 router.use("/clientes", clientesRouter);
 router.use("/produtos", produtosRouter);
 router.use("/apolices", apolicesRouter);

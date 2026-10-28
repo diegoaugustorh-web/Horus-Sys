@@ -1,7 +1,7 @@
 import { useGetDashboardSummary, useGetProximosVencimentos, useGetSinistrosRecentes } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Shield, ShieldAlert, DollarSign, Target, Activity, Users, AlertTriangle, FileText } from "lucide-react";
+import { Shield, ShieldAlert, DollarSign, Target, Activity, Users, AlertTriangle, FileText, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
@@ -17,7 +17,7 @@ export function Dashboard() {
         <p className="text-muted-foreground">Bem-vindo ao Hórus CRM. Aqui está o resumo da sua corretora.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <SummaryCard 
           title="Prêmio Total" 
           value={summary?.premioTotal ? formatCurrency(summary.premioTotal) : undefined}
@@ -68,10 +68,17 @@ export function Dashboard() {
           isLoading={isLoadingSummary}
         />
         <SummaryCard 
-          title="Ganho no Mês" 
-          value={summary?.ganhoMes ? formatCurrency(summary.ganhoMes) : undefined}
+          title="Prêmio Vendido no Mês"
+          value={summary?.premioVendidoMes !== undefined ? formatCurrency(summary.premioVendidoMes) : undefined}
           icon={DollarSign}
-          description="Oportunidades ganhas"
+          description="Pela data de início da vigência"
+          isLoading={isLoadingSummary}
+        />
+        <SummaryCard
+          title="Comissão Gerada no Mês"
+          value={summary?.comissaoGeradaMes !== undefined ? formatCurrency(summary.comissaoGeradaMes) : undefined}
+          icon={TrendingUp}
+          description="Pela data de criação da comissão"
           isLoading={isLoadingSummary}
         />
       </div>
