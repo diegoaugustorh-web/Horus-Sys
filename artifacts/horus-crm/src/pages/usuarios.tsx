@@ -13,15 +13,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/utils";
 
 export function Usuarios() {
   const [search, setSearch] = useState("");
-  const { data: usuarios, isLoading } = useListUsuarios();
+  const { data: usuarios, isLoading, error } = useListUsuarios();
   const deleteUsuario = useDeleteUsuario();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const isForbidden = (error as { status?: number } | null)?.status === 403;
 
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
@@ -67,7 +69,19 @@ export function Usuarios() {
         </Button>
       </div>
 
-      <div className="flex items-center space-x-2">
+      {error ? (
+        <Alert variant="destructive">
+          <AlertTitle>{isForbidden ? "Acesso negado" : "Não foi possível carregar os usuários"}</AlertTitle>
+          <AlertDescription>
+            {isForbidden
+              ? "Somente administradores podem consultar e gerenciar os usuários da equipe."
+              : "Tente novamente em alguns instantes."}
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {!error ? <>
+        <div className="flex items-center space-x-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -155,7 +169,8 @@ export function Usuarios() {
             )}
           </TableBody>
         </Table>
-      </div>
+        </div>
+      </> : null}
     </div>
   );
 }

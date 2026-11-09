@@ -834,3 +834,19 @@ export type ListComissoesParams = {
 status?: string;
 };
 
+export type ListUsuarios403 = {
+  error: string;
+};
+
+export type CreateUsuario403 = {
+  error: string;
+};
+
+export type UpdateUsuario403 = {
+  error: string;
+};
+
+export type DeleteUsuario403 = {
+  error: string;
+};
+

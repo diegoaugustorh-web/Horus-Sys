@@ -703,6 +703,16 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Usuario"
+        "403":
+          description: The authenticated user is not an administrator
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [error]
+                properties:
+                  error:
+                    type: string
     post:
       operationId: createUsuario
       tags: [usuarios]
@@ -720,6 +730,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Usuario"
+        "403":
+          description: The authenticated user is not an administrator
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [error]
+                properties:
+                  error:
+                    type: string
 
   /usuarios/{id}:
     patch:
@@ -745,6 +765,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Usuario"
+        "403":
+          description: The authenticated user is not an administrator
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [error]
+                properties:
+                  error:
+                    type: string
     delete:
       operationId: deleteUsuario
       tags: [usuarios]
@@ -758,6 +788,16 @@ paths:
       responses:
         "204":
           description: Deleted
+        "403":
+          description: The authenticated user is not an administrator
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [error]
+                properties:
+                  error:
+                    type: string
 
   /usuarios/me:
     get:

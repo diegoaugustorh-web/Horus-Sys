@@ -32,13 +32,16 @@ import type {
   Consorcio,
   ConsorcioInput,
   ConsorcioUpdate,
+  CreateUsuario403,
   DashboardSummary,
+  DeleteUsuario403,
   HealthStatus,
   ListApolicesParams,
   ListClientesParams,
   ListComissoesParams,
   ListProdutosParams,
   ListSinistrosParams,
+  ListUsuarios403,
   Oportunidade,
   OportunidadeInput,
   OportunidadeUpdate,
@@ -50,6 +53,7 @@ import type {
   Sinistro,
   SinistroInput,
   SinistroUpdate,
+  UpdateUsuario403,
   Usuario,
   UsuarioInput,
   UsuarioUpdate
@@ -2698,7 +2702,7 @@ export const getListUsuariosQueryKey = () => {
     }
 
 
-export const getListUsuariosQueryOptions = <TData = Awaited<ReturnType<typeof listUsuarios>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listUsuarios>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListUsuariosQueryOptions = <TData = Awaited<ReturnType<typeof listUsuarios>>, TError = ErrorType<ListUsuarios403>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listUsuarios>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -2717,14 +2721,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListUsuariosQueryResult = NonNullable<Awaited<ReturnType<typeof listUsuarios>>>
-export type ListUsuariosQueryError = ErrorType<unknown>
+export type ListUsuariosQueryError = ErrorType<ListUsuarios403>
 
 
 /**
  * @summary List users (admin only)
  */
 
-export function useListUsuarios<TData = Awaited<ReturnType<typeof listUsuarios>>, TError = ErrorType<unknown>>(
+export function useListUsuarios<TData = Awaited<ReturnType<typeof listUsuarios>>, TError = ErrorType<ListUsuarios403>>(
   options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listUsuarios>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -2768,7 +2772,7 @@ export const createUsuario = async (usuarioInput: UsuarioInput, options?: Reques
 
 
 
-export const getCreateUsuarioMutationOptions = <TError = ErrorType<unknown>,
+export const getCreateUsuarioMutationOptions = <TError = ErrorType<CreateUsuario403>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUsuario>>, TError,{data: BodyType<UsuarioInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createUsuario>>, TError,{data: BodyType<UsuarioInput>}, TContext> => {
 
@@ -2797,12 +2801,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CreateUsuarioMutationResult = NonNullable<Awaited<ReturnType<typeof createUsuario>>>
     export type CreateUsuarioMutationBody = BodyType<UsuarioInput>
-    export type CreateUsuarioMutationError = ErrorType<unknown>
+    export type CreateUsuarioMutationError = ErrorType<CreateUsuario403>
 
     /**
  * @summary Create a user (admin only)
  */
-export const useCreateUsuario = <TError = ErrorType<unknown>,
+export const useCreateUsuario = <TError = ErrorType<CreateUsuario403>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUsuario>>, TError,{data: BodyType<UsuarioInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createUsuario>>,
@@ -2840,7 +2844,7 @@ export const updateUsuario = async (id: string,
 
 
 
-export const getUpdateUsuarioMutationOptions = <TError = ErrorType<unknown>,
+export const getUpdateUsuarioMutationOptions = <TError = ErrorType<UpdateUsuario403>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUsuario>>, TError,{id: string;data: BodyType<UsuarioUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateUsuario>>, TError,{id: string;data: BodyType<UsuarioUpdate>}, TContext> => {
 
@@ -2869,12 +2873,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UpdateUsuarioMutationResult = NonNullable<Awaited<ReturnType<typeof updateUsuario>>>
     export type UpdateUsuarioMutationBody = BodyType<UsuarioUpdate>
-    export type UpdateUsuarioMutationError = ErrorType<unknown>
+    export type UpdateUsuarioMutationError = ErrorType<UpdateUsuario403>
 
     /**
  * @summary Update user role
  */
-export const useUpdateUsuario = <TError = ErrorType<unknown>,
+export const useUpdateUsuario = <TError = ErrorType<UpdateUsuario403>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUsuario>>, TError,{id: string;data: BodyType<UsuarioUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateUsuario>>,
@@ -2910,7 +2914,7 @@ export const deleteUsuario = async (id: string, options?: RequestInit): Promise<
 
 
 
-export const getDeleteUsuarioMutationOptions = <TError = ErrorType<unknown>,
+export const getDeleteUsuarioMutationOptions = <TError = ErrorType<DeleteUsuario403>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUsuario>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteUsuario>>, TError,{id: string}, TContext> => {
 
@@ -2939,12 +2943,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteUsuarioMutationResult = NonNullable<Awaited<ReturnType<typeof deleteUsuario>>>
 
-    export type DeleteUsuarioMutationError = ErrorType<unknown>
+    export type DeleteUsuarioMutationError = ErrorType<DeleteUsuario403>
 
     /**
  * @summary Delete a user (admin only)
  */
-export const useDeleteUsuario = <TError = ErrorType<unknown>,
+export const useDeleteUsuario = <TError = ErrorType<DeleteUsuario403>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUsuario>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof deleteUsuario>>,
