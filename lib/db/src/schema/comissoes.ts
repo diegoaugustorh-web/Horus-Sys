@@ -6,6 +6,7 @@ import { sql } from "drizzle-orm";
 export const comissoes = pgTable("comissoes", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
   apoliceId: text("apolice_id"),
+  corretorId: text("corretor_id"), // ID do usuário responsável
   parcela: integer("parcela").notNull().default(1),
   totalParcelas: integer("total_parcelas").notNull().default(1),
   valor: numeric("valor").notNull().default("0"),
