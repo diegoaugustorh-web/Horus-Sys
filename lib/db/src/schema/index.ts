@@ -7,3 +7,4 @@ export * from "./comissoes";
 export * from "./consorcios";
 export * from "./reunioes";
 export * from "./usuarios";
+export * from "./renovacoes";
