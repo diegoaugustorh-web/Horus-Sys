@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { apolices, sinistros, comissoes, oportunidades, clientes, usuarios } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getAuth } from "@clerk/express";
 import {
   activePolicies,
@@ -32,9 +32,8 @@ async function getEffectiveCorretorId(req: any): Promise<string | null> {
   const [user] = await db.select({ role: usuarios.role }).from(usuarios).where(eq(usuarios.id, userId)).limit(1);
   const isAdmin = user?.role === "admin";
 
-  // Admin pode filtrar por query param; corretor só vê o próprio
   if (isAdmin) {
-    return (req.query.corretorId as string) || null; // null = todos
+    return (req.query.corretorId as string) || null;
   }
   return userId;
 }
@@ -50,15 +49,24 @@ router.get("/summary", async (req, res) => {
   }).from(apolices);
   if (corretorId) policyQuery.where(eq(apolices.corretorId, corretorId));
 
+  const comissoesQuery = db.select({
+    valor: comissoes.valor,
+    criadoEm: comissoes.criadoEm,
+    status: comissoes.status,
+  }).from(comissoes);
+  if (corretorId) comissoesQuery.where(eq(comissoes.corretorId, corretorId));
+
+  const oportunidadesQuery = db.select({
+    estagio: oportunidades.estagio,
+    valorEstimado: oportunidades.valorEstimado,
+  }).from(oportunidades);
+  if (corretorId) oportunidadesQuery.where(eq(oportunidades.corretorId, corretorId));
+
   const [policyRows, allSinistros, allComissoes, allOportunidades, clientRows] = await Promise.all([
     policyQuery,
-    db.select({ status: sinistros.status }).from(sinistros), // TODO: filtrar sinistros por corretor via join se necessário
-    db.select({
-      valor: comissoes.valor,
-      criadoEm: comissoes.criadoEm,
-      status: comissoes.status,
-    }).from(comissoes),
-    db.select({ estagio: oportunidades.estagio, valorEstimado: oportunidades.valorEstimado }).from(oportunidades),
+    db.select({ status: sinistros.status }).from(sinistros),
+    comissoesQuery,
+    oportunidadesQuery,
     db.select({ id: clientes.id }).from(clientes),
   ]);
 
