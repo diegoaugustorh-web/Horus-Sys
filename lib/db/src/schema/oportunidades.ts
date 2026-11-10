@@ -7,6 +7,7 @@ export const oportunidades = pgTable("oportunidades", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
   cliente: text("cliente").notNull(),
   clienteId: text("cliente_id"),
+  corretorId: text("corretor_id"), // ID do usuário responsável
   ramo: text("ramo").notNull().default("Auto"),
   valorEstimado: numeric("valor_estimado").notNull().default("0"),
   estagio: text("estagio").notNull().default("Lead"),
