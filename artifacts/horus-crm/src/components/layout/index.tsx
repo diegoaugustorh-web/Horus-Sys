@@ -11,7 +11,8 @@ import {
   Car,
   Settings,
   LogOut,
-  Menu
+  Menu,
+  Bell
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,6 +27,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Renovações", href: "/renovacoes", icon: Bell },
   { title: "Clientes", href: "/clientes", icon: Users },
   { title: "Apólices", href: "/apolices", icon: Shield },
   { title: "Pipeline", href: "/pipeline", icon: Target },
