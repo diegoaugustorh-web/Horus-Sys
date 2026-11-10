@@ -11,6 +11,7 @@ import reunioesRouter from "./reunioes";
 import usuariosRouter from "./usuarios";
 import dashboardRouter from "./dashboard";
 import renovacoesRouter from "./renovacoes";
+import seguradorasRouter from "./seguradoras";
 import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
@@ -28,5 +29,6 @@ router.use("/reunioes", reunioesRouter);
 router.use("/usuarios", usuariosRouter);
 router.use("/dashboard", dashboardRouter);
 router.use("/renovacoes", renovacoesRouter);
+router.use("/seguradoras", seguradorasRouter);
 
 export default router;
