@@ -7,6 +7,7 @@ export const apolices = pgTable("apolices", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
   numero: text("numero").notNull(),
   clienteId: text("cliente_id"),
+  corretorId: text("corretor_id"), // ID do usuário (Clerk) responsável
   seguradora: text("seguradora"),
   ramo: text("ramo").notNull().default("Auto"),
   premio: numeric("premio").notNull().default("0"),
