@@ -19,6 +19,7 @@ import { Sinistros } from "@/pages/sinistros";
 import { Consorcios } from "@/pages/consorcios";
 import { Produtos } from "@/pages/produtos";
 import { Usuarios } from "@/pages/usuarios";
+import { Renovacoes } from "@/pages/renovacoes";
 import NotFound from "@/pages/not-found";
 
 const clerkPubKey = publishableKeyFromHost(
@@ -202,6 +203,9 @@ function AppRouter() {
       </Route>
       <Route path="/usuarios">
         <ProtectedRoute component={Usuarios} />
+      </Route>
+      <Route path="/renovacoes">
+        <ProtectedRoute component={Renovacoes} />
       </Route>
       
       {/* Fallback to NotFound */}
