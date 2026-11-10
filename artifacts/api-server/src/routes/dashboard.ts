@@ -10,9 +10,19 @@ import {
   todayDateKey,
   upcomingPolicies,
   upcomingPolicyCount,
+  addDays,
+  validDateKey,
 } from "./dashboard-metrics";
 
 const router = Router();
+
+function daysUntil(dateKey: string | null, today: string): number | null {
+  const end = validDateKey(dateKey);
+  if (!end) return null;
+  const endDate = new Date(`${end}T00:00:00.000Z`);
+  const todayDate = new Date(`${today}T00:00:00.000Z`);
+  return Math.ceil((endDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
+}
 
 router.get("/summary", async (req, res) => {
   const [policyRows, allSinistros, allComissoes, allOportunidades, clientRows] = await Promise.all([
@@ -51,6 +61,11 @@ router.get("/summary", async (req, res) => {
     .filter((o) => !["Ganho", "Perdido"].includes(o.estagio))
     .reduce((sum, o) => sum + Number(o.valorEstimado), 0);
 
+  // Health score simples: baseado em renovação e sinistros
+  const totalAtivas = currentActivePolicies.length || 1;
+  const renovacaoRate = Math.max(0, 100 - (aRenovar / totalAtivas) * 100);
+  const saudeCarteira = Math.round(renovacaoRate * 0.7 + (100 - Math.min(sinistrosAbertos * 10, 100)) * 0.3);
+
   res.json({
     premioTotal,
     premioVendidoMes,
@@ -63,6 +78,7 @@ router.get("/summary", async (req, res) => {
     totalClientes: clientRows.length,
     totalApolices: policyRows.length,
     totalOportunidades: allOportunidades.length,
+    saudeCarteira,
   });
 });
 
@@ -76,29 +92,46 @@ router.get("/proximos-vencimentos", async (req, res) => {
     rows.map(({ apolices: policy, clientes: client }) => ({
       ...policy,
       clienteNome: client?.nome ?? null,
+      clienteTelefone: client?.telefone ?? null,
+      clienteId: client?.id ?? null,
     })),
     today,
-  ).slice(0, 10);
+  ).slice(0, 15);
 
-  res.json(upcoming.map((a) => ({
-    ...a,
-    premio: Number(a.premio),
-    comissaoPct: Number(a.comissaoPct),
-    criadoEm: a.criadoEm.toISOString(),
-  })));
+  res.json(upcoming.map((a) => {
+    const days = daysUntil(a.fim, today);
+    return {
+      ...a,
+      premio: Number(a.premio),
+      comissaoPct: Number(a.comissaoPct),
+      criadoEm: a.criadoEm.toISOString(),
+      daysUntil: days,
+      urgency: days !== null ? (days <= 7 ? "critical" : days <= 15 ? "warning" : "normal") : "normal",
+    };
+  }));
 });
 
 router.get("/sinistros-recentes", async (req, res) => {
-  const rows = await db.select().from(sinistros);
+  const rows = await db
+    .select()
+    .from(sinistros)
+    .leftJoin(apolices, eq(sinistros.apoliceId, apolices.id))
+    .leftJoin(clientes, eq(apolices.clienteId, clientes.id));
+
   const recent = rows
+    .map(({ sinistros: s, apolices: a, clientes: c }) => ({
+      ...s,
+      apoliceNumero: a?.numero ?? null,
+      clienteNome: c?.nome ?? null,
+      apoliceRamo: a?.ramo ?? null,
+      clienteId: c?.id ?? null,
+      clienteTelefone: c?.telefone ?? null,
+    }))
     .sort((a, b) => b.criadoEm.getTime() - a.criadoEm.getTime())
     .slice(0, 5);
 
   res.json(recent.map((s) => ({
     ...s,
-    apoliceNumero: null,
-    clienteNome: null,
-    apoliceRamo: null,
     valorEstimado: Number(s.valorEstimado),
     abertoEm: s.abertoEm.toISOString(),
     criadoEm: s.criadoEm.toISOString(),
