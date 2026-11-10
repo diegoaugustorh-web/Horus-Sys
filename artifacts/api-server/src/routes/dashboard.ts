@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { apolices, sinistros, comissoes, oportunidades, clientes } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { apolices, sinistros, comissoes, oportunidades, clientes, usuarios } from "@workspace/db";
+import { eq, and } from "drizzle-orm";
+import { getAuth } from "@clerk/express";
 import {
   activePolicies,
   monthKey,
@@ -10,7 +11,6 @@ import {
   todayDateKey,
   upcomingPolicies,
   upcomingPolicyCount,
-  addDays,
   validDateKey,
 } from "./dashboard-metrics";
 
@@ -24,15 +24,35 @@ function daysUntil(dateKey: string | null, today: string): number | null {
   return Math.ceil((endDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
 }
 
+async function getEffectiveCorretorId(req: any): Promise<string | null> {
+  const auth = getAuth(req);
+  const userId = auth.userId;
+  if (!userId) return null;
+
+  const [user] = await db.select({ role: usuarios.role }).from(usuarios).where(eq(usuarios.id, userId)).limit(1);
+  const isAdmin = user?.role === "admin";
+
+  // Admin pode filtrar por query param; corretor só vê o próprio
+  if (isAdmin) {
+    return (req.query.corretorId as string) || null; // null = todos
+  }
+  return userId;
+}
+
 router.get("/summary", async (req, res) => {
+  const corretorId = await getEffectiveCorretorId(req);
+
+  const policyQuery = db.select({
+    status: apolices.status,
+    inicio: apolices.inicio,
+    fim: apolices.fim,
+    premio: apolices.premio,
+  }).from(apolices);
+  if (corretorId) policyQuery.where(eq(apolices.corretorId, corretorId));
+
   const [policyRows, allSinistros, allComissoes, allOportunidades, clientRows] = await Promise.all([
-    db.select({
-      status: apolices.status,
-      inicio: apolices.inicio,
-      fim: apolices.fim,
-      premio: apolices.premio,
-    }).from(apolices),
-    db.select({ status: sinistros.status }).from(sinistros),
+    policyQuery,
+    db.select({ status: sinistros.status }).from(sinistros), // TODO: filtrar sinistros por corretor via join se necessário
     db.select({
       valor: comissoes.valor,
       criadoEm: comissoes.criadoEm,
@@ -61,7 +81,6 @@ router.get("/summary", async (req, res) => {
     .filter((o) => !["Ganho", "Perdido"].includes(o.estagio))
     .reduce((sum, o) => sum + Number(o.valorEstimado), 0);
 
-  // Health score simples: baseado em renovação e sinistros
   const totalAtivas = currentActivePolicies.length || 1;
   const renovacaoRate = Math.max(0, 100 - (aRenovar / totalAtivas) * 100);
   const saudeCarteira = Math.round(renovacaoRate * 0.7 + (100 - Math.min(sinistrosAbertos * 10, 100)) * 0.3);
@@ -84,10 +103,18 @@ router.get("/summary", async (req, res) => {
 
 router.get("/proximos-vencimentos", async (req, res) => {
   const today = todayDateKey();
-  const rows = await db
+  const corretorId = await getEffectiveCorretorId(req);
+
+  let query = db
     .select()
     .from(apolices)
     .leftJoin(clientes, eq(apolices.clienteId, clientes.id));
+
+  if (corretorId) {
+    query = query.where(eq(apolices.corretorId, corretorId));
+  }
+
+  const rows = await query;
   const upcoming = upcomingPolicies(
     rows.map(({ apolices: policy, clientes: client }) => ({
       ...policy,
@@ -112,11 +139,19 @@ router.get("/proximos-vencimentos", async (req, res) => {
 });
 
 router.get("/sinistros-recentes", async (req, res) => {
-  const rows = await db
+  const corretorId = await getEffectiveCorretorId(req);
+
+  let query = db
     .select()
     .from(sinistros)
     .leftJoin(apolices, eq(sinistros.apoliceId, apolices.id))
     .leftJoin(clientes, eq(apolices.clienteId, clientes.id));
+
+  if (corretorId) {
+    query = query.where(eq(apolices.corretorId, corretorId));
+  }
+
+  const rows = await query;
 
   const recent = rows
     .map(({ sinistros: s, apolices: a, clientes: c }) => ({
