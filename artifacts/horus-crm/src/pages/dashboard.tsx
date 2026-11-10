@@ -1,19 +1,30 @@
-import { useGetDashboardSummary, useGetProximosVencimentos, useGetSinistrosRecentes } from "@workspace/api-client-react";
+import { useState } from "react";
+import { useGetDashboardSummary, useGetProximosVencimentos, useGetSinistrosRecentes, useListUsuarios } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Shield, ShieldAlert, DollarSign, Target, Activity, Users, AlertTriangle, FileText, TrendingUp, MessageCircle, HeartPulse } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useUser } from "@clerk/react";
 
 export function Dashboard() {
-  const { data: summary, isLoading: isLoadingSummary } = useGetDashboardSummary();
-  const { data: vencimentos, isLoading: isLoadingVencimentos } = useGetProximosVencimentos();
-  const { data: sinistros, isLoading: isLoadingSinistros } = useGetSinistrosRecentes();
+  const { user } = useUser();
+  const [corretorId, setCorretorId] = useState<string | undefined>(undefined);
 
-  // Agrupa renovações por urgência para o gráfico simples
+  // Assumindo que o usuário atual tem role (pode vir do /me ou claims)
+  const isAdmin = true; // TODO: buscar role real do usuário (via useGetMe ou similar)
+
+  const params = corretorId ? { corretorId } : {};
+
+  const { data: summary, isLoading: isLoadingSummary } = useGetDashboardSummary(params);
+  const { data: vencimentos, isLoading: isLoadingVencimentos } = useGetProximosVencimentos(params);
+  const { data: sinistros, isLoading: isLoadingSinistros } = useGetSinistrosRecentes(params);
+  const { data: usuarios } = useListUsuarios(undefined, { enabled: isAdmin });
+
   const chartData = vencimentos
     ? [
         { name: "≤7 dias", value: vencimentos.filter(v => v.urgency === "critical").length, fill: "#ef4444" },
@@ -31,15 +42,29 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h2>
           <p className="text-muted-foreground">Bem-vindo ao Hórus CRM. Aqui está o resumo da sua corretora.</p>
         </div>
-        {/* Placeholder para filtro por corretor — schema ainda não tem corretorId */}
-        <div className="text-sm text-muted-foreground">
-          Visão geral da corretora
-        </div>
+
+        {isAdmin && (
+          <div className="w-full md:w-64">
+            <Select value={corretorId || "all"} onValueChange={(v) => setCorretorId(v === "all" ? undefined : v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrar por corretor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os corretores</SelectItem>
+                {usuarios?.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.nome || u.email}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {/* KPIs principais */}
@@ -138,7 +163,6 @@ export function Dashboard() {
       </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Próximos Vencimentos com urgência, link e WhatsApp */}
         <Card className="col-span-1 shadow-sm">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -214,7 +238,6 @@ export function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Sinistros com link */}
         <Card className="col-span-1 shadow-sm">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
