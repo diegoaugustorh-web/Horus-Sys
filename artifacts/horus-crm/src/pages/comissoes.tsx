@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { trackEvent } from "@/lib/analytics";
 
 export function Comissoes() {
   const [search, setSearch] = useState("");
@@ -29,6 +30,7 @@ export function Comissoes() {
     try {
       await updateComissao.mutateAsync({ id, data: { status: novoStatus } });
       queryClient.invalidateQueries({ queryKey: getListComissoesQueryKey() });
+      trackEvent("commission_status_changed", { status: novoStatus });
       toast({ title: "Status atualizado com sucesso" });
     } catch (error) {
       toast({ title: "Erro ao atualizar status", variant: "destructive" });

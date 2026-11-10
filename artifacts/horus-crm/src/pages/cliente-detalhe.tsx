@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Save } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 const clienteSchema = z.object({
   nome: z.string().min(2, "Nome é obrigatório"),
@@ -88,9 +89,11 @@ export function ClienteDetalhe() {
     try {
       if (isNew) {
         await createCliente.mutateAsync({ data });
+        trackEvent("client_created", { client_type: data.tipo });
         toast({ title: "Cliente criado com sucesso" });
       } else {
         await updateCliente.mutateAsync({ id: id as string, data });
+        trackEvent("client_updated", { client_type: data.tipo });
         toast({ title: "Cliente atualizado com sucesso" });
       }
       queryClient.invalidateQueries({ queryKey: getListClientesQueryKey() });

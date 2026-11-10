@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { trackEvent } from "@/lib/analytics";
 
 const COLUMNS = ["Lead", "Cotação", "Proposta", "Negociação", "Ganho", "Perdido"] as const;
 
@@ -59,6 +60,10 @@ export function Pipeline() {
         await updateOportunidade.mutateAsync({ 
           id, 
           data: { estagio: targetColumn as any } 
+        });
+        trackEvent("opportunity_stage_changed", {
+          from_stage: item.estagio,
+          to_stage: targetColumn,
         });
         toast({ title: `Movido para ${targetColumn}` });
       } catch (error) {

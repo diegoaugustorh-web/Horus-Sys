@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { trackEvent } from "@/lib/analytics";
 
 export function Produtos() {
   const [search, setSearch] = useState("");
@@ -28,6 +29,7 @@ export function Produtos() {
     try {
       await updateProduto.mutateAsync({ id, data: { ativo: !ativoAtual } });
       queryClient.invalidateQueries({ queryKey: getListProdutosQueryKey() });
+      trackEvent("product_activation_changed", { active: !ativoAtual });
       toast({ title: `Produto ${!ativoAtual ? 'ativado' : 'inativado'} com sucesso` });
     } catch (error) {
       toast({ title: "Erro ao atualizar produto", variant: "destructive" });
