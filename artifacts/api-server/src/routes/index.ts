@@ -10,6 +10,7 @@ import consorciosRouter from "./consorcios";
 import reunioesRouter from "./reunioes";
 import usuariosRouter from "./usuarios";
 import dashboardRouter from "./dashboard";
+import renovacoesRouter from "./renovacoes";
 import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
@@ -26,5 +27,6 @@ router.use("/consorcios", consorciosRouter);
 router.use("/reunioes", reunioesRouter);
 router.use("/usuarios", usuariosRouter);
 router.use("/dashboard", dashboardRouter);
+router.use("/renovacoes", renovacoesRouter);
 
 export default router;
